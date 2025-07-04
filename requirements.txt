@@ -1,0 +1,13 @@
+fastapi
+uvicorn
+langchain
+langgraph
+python-dotenv
+google-auth
+google-auth-oauthlib
+google-auth-httplib2
+google-api-python-client
+httpx
+pytz
+google-generativeai
+dateparser
