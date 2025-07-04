@@ -8,7 +8,6 @@ import re
 from calendar_utils import get_calendar_service, check_availability, book_event
 from langgraph_flow import app as langgraph_app
 
-# Set up logger
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -19,10 +18,6 @@ class BookingRequest(BaseModel):
 
 @app.post("/book")
 def book_appointment(request: BookingRequest):
-    """
-    Takes natural language, extracts time using LangGraph, checks availability,
-    and books the appointment if possible.
-    """
     try:
         user_input = request.user_input
         logger.info(f"User input: {user_input}")
@@ -57,8 +52,6 @@ def book_appointment(request: BookingRequest):
 
         # Calculate the end time --> after 30 minutes
         end_time = start_time + timedelta(minutes=30)
-
-        # Get the Google Calendar service
         service = get_calendar_service()
 
         # Check availability
