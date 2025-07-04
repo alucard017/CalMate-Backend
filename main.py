@@ -5,8 +5,8 @@ from dateparser import parse
 import logging
 import re
 
-from backend.calendar_utils import get_calendar_service, check_availability, book_event
-from backend.langgraph_flow import app as langgraph_app
+from calendar_utils import get_calendar_service, check_availability, book_event
+from langgraph_flow import app as langgraph_app
 
 # Set up logger
 logging.basicConfig(level=logging.INFO)
