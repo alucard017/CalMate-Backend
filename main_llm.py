@@ -176,7 +176,7 @@ def chat_with_llm(req: ChatRequest):
 
         response = client.chat.completions.create(
             extra_headers={
-                "HTTP-Referer": "http://localhost:8051",
+                "HTTP-Referer": "https://calmate-frontend-qn3r.onrender.com/",
                 "X-Title": "CalMate"
             },
             model="openai/gpt-3.5-turbo-0613",
