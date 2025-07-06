@@ -11,3 +11,5 @@ httpx
 pytz
 google-generativeai
 dateparser
+openrouter
+openai
