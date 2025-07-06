@@ -54,13 +54,11 @@ def book_appointment(request: BookingRequest):
         end_time = start_time + timedelta(minutes=30)
         service = get_calendar_service()
 
-        # Check availability
         if not check_availability(start_time, end_time, service):
             raise HTTPException(status_code=409, detail="Time slot is already booked.")
 
         logger.info(f"Availability checked for {start_time} to {end_time}: Available")
 
-        # Book the event and get th link
         link = book_event("CalMate Booking", start_time, end_time, service)
         logger.info(f"Event created with link: {link}")
 
