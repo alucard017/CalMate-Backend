@@ -3,14 +3,20 @@ from googleapiclient.discovery import build
 from datetime import datetime, timedelta
 import pytz
 import os
+import json
 
 SCOPES = ['https://www.googleapis.com/auth/calendar']
 CALENDAR_ID = 'apurbasundar2002@gmail.com'
 CREDENTIALS_FILE = 'credentials.json'
 
 def get_calendar_service():
-    credentials = service_account.Credentials.from_service_account_file(
-        CREDENTIALS_FILE,
+    # credentials = service_account.Credentials.from_service_account_file(
+    #     CREDENTIALS_FILE,
+    #     scopes=SCOPES
+    # )
+    credentials_dict = json.loads(os.getenv("GOOGLE_CREDENTIALS"))
+    credentials = service_account.Credentials.from_service_account_info(
+        credentials_dict,
         scopes=SCOPES
     )
     service = build('calendar', 'v3', credentials=credentials)
