@@ -42,7 +42,7 @@ class FindOpenSlotsRequest(BaseModel):
 class ChatRequest(BaseModel):
     messages: list
 
-# === Utility Parser ===
+# Date Parser
 def parse_date(text: str):
     return dateparser.parse(text, settings={
         "PREFER_DATES_FROM": "future",
