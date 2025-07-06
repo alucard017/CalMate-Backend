@@ -3,25 +3,28 @@ from googleapiclient.discovery import build
 from datetime import datetime, timedelta
 import pytz
 import os
-import json
 
 SCOPES = ['https://www.googleapis.com/auth/calendar']
 CALENDAR_ID = 'apurbasundar2002@gmail.com'
+CREDENTIALS_FILE = 'credentials.json'
 
 def get_calendar_service():
-    service_account_info = json.loads(os.environ['GOOGLE_CREDENTIALS'])
-    credentials = service_account.Credentials.from_service_account_info(
-        service_account_info,
+    credentials = service_account.Credentials.from_service_account_file(
+        CREDENTIALS_FILE,
         scopes=SCOPES
     )
     service = build('calendar', 'v3', credentials=credentials)
     return service
 
+def localize_if_needed(dt: datetime, tz):
+    if dt.tzinfo is None:
+        return tz.localize(dt)
+    return dt.astimezone(tz)
 
 def check_availability(start_time: datetime, end_time: datetime, service) -> bool:
     ist = pytz.timezone("Asia/Kolkata")
-    start_time = ist.localize(start_time)
-    end_time = ist.localize(end_time)
+    start_time = localize_if_needed(start_time, ist)
+    end_time = localize_if_needed(end_time, ist)
 
     events_result = service.events().list(
         calendarId=CALENDAR_ID,
@@ -32,9 +35,13 @@ def check_availability(start_time: datetime, end_time: datetime, service) -> boo
     ).execute()
 
     events = events_result.get('items', [])
-    return len(events) == 0  # Return True if slot is available
+    return len(events) == 0
 
 def book_event(summary: str, start_time: datetime, end_time: datetime, service) -> str:
+    ist = pytz.timezone("Asia/Kolkata")
+    start_time = localize_if_needed(start_time, ist)
+    end_time = localize_if_needed(end_time, ist)
+
     event = {
         'summary': summary,
         'start': {'dateTime': start_time.isoformat(), 'timeZone': 'Asia/Kolkata'},
