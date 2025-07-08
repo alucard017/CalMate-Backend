@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CalMate - Smart Calendar Assistant</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>CalMate</h1>
+
+      <div id="auth-section">
+        <button onclick="redirectToGoogle()" class="btn">
+          Sign in with Google
+        </button>
+      </div>
+
+      <div id="dashboard" class="hidden">
+        <h2>Welcome, <span id="userEmail"></span></h2>
+
+        <section>
+          <h3>📅 Book Event</h3>
+          <input type="text" id="summary" placeholder="Event Summary" />
+          <input type="datetime-local" id="start" />
+          <input type="datetime-local" id="end" />
+          <input
+            type="text"
+            id="attendees"
+            placeholder="Attendee Emails (comma separated)"
+          />
+          <button class="btn" onclick="bookEvent()">Book</button>
+          <div id="bookResult"></div>
+        </section>
+
+        <section>
+          <h3>✅ Check Availability</h3>
+          <input type="datetime-local" id="checkStart" />
+          <input type="datetime-local" id="checkEnd" />
+          <button class="btn" onclick="checkAvailability()">Check</button>
+          <div id="availResult"></div>
+        </section>
+
+        <section>
+          <h3>🔍 Find Open Slots</h3>
+          <input type="date" id="slotDate" />
+          <input
+            type="number"
+            id="duration"
+            placeholder="Duration in minutes"
+          />
+          <button class="btn" onclick="findSlots()">Find</button>
+          <div id="slotsResult"></div>
+        </section>
+      </div>
+    </div>
+
+    <script>
+      const backend = "http://localhost:8000";
+      const user =
+        new URLSearchParams(window.location.search).get("user") ||
+        localStorage.getItem("user_email");
+
+      if (user) {
+        localStorage.setItem("user_email", user);
+        document.getElementById("auth-section").classList.add("hidden");
+        document.getElementById("dashboard").classList.remove("hidden");
+        document.getElementById("userEmail").innerText = user;
+      }
+
+      function redirectToGoogle() {
+        window.location.href = `${backend}/auth/google`;
+      }
+
+      async function bookEvent() {
+        const summary = document.getElementById("summary").value;
+        const start_time = document.getElementById("start").value;
+        const end_time = document.getElementById("end").value;
+        const attendees = document
+          .getElementById("attendees")
+          .value.split(",")
+          .map((s) => s.trim())
+          .filter(Boolean);
+
+        const res = await fetch(`${backend}/book-event`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            user_email: user,
+            summary,
+            start_time,
+            end_time,
+            attendees,
+          }),
+        });
+        const data = await res.json();
+        document.getElementById("bookResult").innerHTML = data.calendar_link
+          ? `<a href="${data.calendar_link}" target="_blank">View on Google Calendar</a>`
+          : `❌ ${data.detail}`;
+      }
+
+      async function checkAvailability() {
+        const start_time = document.getElementById("checkStart").value;
+        const end_time = document.getElementById("checkEnd").value;
+
+        const res = await fetch(`${backend}/check-availability`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ user_email: user, start_time, end_time }),
+        });
+        const data = await res.json();
+        document.getElementById("availResult").innerText = data.available
+          ? "✅ Free"
+          : "❌ Busy";
+      }
+
+      async function findSlots() {
+        const date = document.getElementById("slotDate").value;
+        const duration_minutes = +document.getElementById("duration").value;
+
+        const res = await fetch(`${backend}/find-open-slots`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ user_email: user, date, duration_minutes }),
+        });
+        const data = await res.json();
+
+        document.getElementById("slotsResult").innerHTML =
+          data.open_slots
+            .map(
+              (slot) => `<div>🕒 ${slot.start_time} - ${slot.end_time}</div>`
+            )
+            .join("") || "No slots found";
+      }
+    </script>
+  </body>
+</html>
