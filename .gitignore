@@ -3,3 +3,5 @@ credentials.json
 venv/
 client_secret.json
 *.pickle
+_pycache_
+tokens/
